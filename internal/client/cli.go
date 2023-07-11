@@ -92,13 +92,19 @@ func (c *ClientsCommand) updateClients() {
 
 func (c *ClientsCommand) initClients() error {
 	ctx := context.Background()
-	var options []option.ClientOption
+	options := []option.ClientOption{}
 
 	cloudStorageClient, err := cloudstorage.NewClient(ctx, options...)
 	if err != nil {
 		return err
 	}
 	c.cloudStorageClient = cloudStorageClient
+
+	taskClient, err := cloudtask.NewClient(ctx, options...)
+	if err != nil {
+		return err
+	}
+	c.cloudTasksClient = taskClient
 
 	return nil
 
@@ -117,6 +123,9 @@ func (c *ClientsCommand) getConfig() error {
 		storageConfig, err := cloudstorage.GetStorageConfig(clientViper, client)
 		utils.CheckErr(err)
 		config.StorageBucket = storageConfig
+		taskConfig, err := cloudtask.GetTaskConfig(clientViper, client)
+		utils.CheckErr(err)
+		config.TasksQueue = taskConfig
 		c.clientConfigs = append(c.clientConfigs, config)
 	}
 	return nil
